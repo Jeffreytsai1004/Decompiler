@@ -37,12 +37,10 @@ pycdc_path = os.path.join('build', 'Release', 'pycdc.exe')
 if not os.path.exists(pycdc_path):
     raise FileNotFoundError(f"找不到 pycdc.exe，请确保文件位于: {os.path.abspath(pycdc_path)}")
 
-# Python embed 包路径
-python_embed_dir = os.path.join(".", "python")
-if not os.path.exists(python_embed_dir):
-    raise FileNotFoundError(f"找不到 Python embed 包: {os.path.abspath(python_embed_dir)}")
-
 block_cipher = None
+
+print(f"使用系统Python: {sys.version}")
+print(f"Python路径: {sys.executable}")
 
 # 收集 customtkinter 的所有依赖
 customtkinter_datas = []
@@ -75,31 +73,7 @@ hiddenimports = [
 ]
 hiddenimports.extend(customtkinter_hiddenimports)  # 添加 customtkinter 隐藏导入
 
-# 添加 Python embed 包中的 DLL
-python_dlls = [
-    'python312.dll',
-    'vcruntime140.dll',
-    'python3.dll',
-    'select.pyd',
-    '_socket.pyd',
-    '_decimal.pyd',
-    '_multiprocessing.pyd',
-    '_ctypes.pyd',
-    '_queue.pyd',
-    '_ssl.pyd',
-    '_hashlib.pyd',
-    'unicodedata.pyd',
-]
-
-for dll in python_dlls:
-    dll_path = os.path.join(python_embed_dir, dll)
-    if os.path.exists(dll_path):
-        binaries.append((dll_path, '.'))
-    else:
-        print(f"警告: 未找到 {dll}")
-
-# 添加 tcl/tk 支持
-tcl_tk_files = []
+print("PyInstaller将自动收集系统Python的依赖")
 
 # 从 Python 安装目录获取 DLL
 python_dlls_dir = os.path.join(sys.base_prefix, 'DLLs')
@@ -110,6 +84,8 @@ if os.path.exists(python_dlls_dir):
         binaries.append((tcl_dll, '.'))
     if os.path.exists(tk_dll):
         binaries.append((tk_dll, '.'))
+
+# PyInstaller会自动从系统Python收集tcl/tk库
 
 # 获取 tcl/tk 库文件
 tcl_lib = os.path.join(sys.base_prefix, 'tcl')
@@ -131,35 +107,6 @@ if os.path.exists(tcl_lib):
                 full_path = os.path.join(root, file)
                 rel_path = os.path.relpath(root, tcl_lib)
                 datas.append((full_path, rel_path))
-
-# 如果找不到系统安装的 tcl/tk，尝试从 embed 包中获取
-if not any(binary[1] == '.' and 'tcl86t.dll' in binary[0] for binary in binaries):
-    embed_dlls_dir = os.path.join(python_embed_dir, 'DLLs')
-    if os.path.exists(embed_dlls_dir):
-        tcl_dll = os.path.join(embed_dlls_dir, 'tcl86t.dll')
-        tk_dll = os.path.join(embed_dlls_dir, 'tk86t.dll')
-        if os.path.exists(tcl_dll):
-            binaries.append((tcl_dll, '.'))
-        if os.path.exists(tk_dll):
-            binaries.append((tk_dll, '.'))
-
-# 如果找不到系统的 tcl/tk 库文件，尝试从 embed 包中获取
-embed_tcl_lib = os.path.join(python_embed_dir, 'Lib', 'tcl8.6')
-embed_tk_lib = os.path.join(python_embed_dir, 'Lib', 'tk8.6')
-
-if os.path.exists(embed_tcl_lib):
-    for root, dirs, files in os.walk(embed_tcl_lib):
-        for file in files:
-            full_path = os.path.join(root, file)
-            rel_path = os.path.relpath(root, os.path.dirname(embed_tcl_lib))
-            datas.append((full_path, rel_path))
-
-if os.path.exists(embed_tk_lib):
-    for root, dirs, files in os.walk(embed_tk_lib):
-        for file in files:
-            full_path = os.path.join(root, file)
-            rel_path = os.path.relpath(root, os.path.dirname(embed_tk_lib))
-            datas.append((full_path, rel_path))
 
 binaries.extend(customtkinter_binaries)  # 添加 customtkinter 二进制文件
 

@@ -144,12 +144,6 @@ if %errorlevel% equ 0 (
 )
 del temp_typing_check.txt >nul 2>&1
 
-REM 检查python目录是否存在
-if not exist "python" (
-    echo [警告] 未找到python目录，打包可能会失败
-    echo 请确保python embed包已解压到python目录
-)
-
 REM 使用PyInstaller打包
 echo [*] 正在打包GUI应用程序...
 python -m PyInstaller decompiler.spec
