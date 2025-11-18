@@ -6,6 +6,7 @@ echo ========================================
 echo.
 
 REM 检查Python是否安装
+for /f "tokens=*" %%i in ('python --version 2^>^&1') do set PYTHON_VERSION=%%i
 python --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo [错误] 未检测到Python，请先安装Python 3.6+
@@ -13,7 +14,7 @@ if %errorlevel% neq 0 (
     pause
     exit /b 1
 )
-echo [✓] Python已安装
+echo [✓] %PYTHON_VERSION%
 
 REM 检查decompiler_gui.py是否存在
 if not exist "decompiler_gui.py" (
@@ -63,7 +64,11 @@ echo 启动调试模式
 echo ========================================
 echo [*] 使用Python直接运行GUI脚本
 echo [*] 控制台输出将显示调试信息
-echo [*] 按Ctrl+C可终止程序
+echo [*] 关闭GUI窗口将结束程序
+echo [*] 按Ctrl+C可强制终止程序
+echo.
+echo 正在启动...
+echo ========================================
 echo.
 
 REM 直接运行Python脚本，保持控制台窗口显示输出
