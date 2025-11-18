@@ -68,7 +68,6 @@ hiddenimports = [
     'tkinter.filedialog',
     'customtkinter',
     'darkdetect',  # customtkinter 依赖
-    'typing',
     'packaging',
     'packaging.version',
     'packaging.specifiers',
