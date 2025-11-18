@@ -10,3 +10,4 @@ tests-out
 /mingw64
 /Release
 /venv
+dist

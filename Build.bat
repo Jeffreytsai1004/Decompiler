@@ -61,11 +61,20 @@ echo ========================================
 echo 步骤2: 构建C++核心程序 (pycdc.exe)
 echo ========================================
 
-REM 创建build目录
-if not exist "build" (
-    mkdir build
-    echo [✓] 创建build目录
+REM 删除旧的build目录
+if exist "build" (
+    echo [*] 删除旧的build目录...
+    rmdir /s /q build
+    if %errorlevel% neq 0 (
+        echo [警告] 删除build目录失败，可能有文件被占用
+    ) else (
+        echo [✓] 旧build目录已删除
+    )
 )
+
+REM 创建新的build目录
+mkdir build
+echo [✓] 创建build目录
 
 cd build
 
@@ -111,21 +120,29 @@ echo ========================================
 echo 步骤3: 打包GUI应用程序
 echo ========================================
 
-REM 卸载typing包（与PyInstaller不兼容）
-echo [*] 检查typing包...
-python -c "import typing" >nul 2>&1
-if %errorlevel% equ 0 (
-    python -c "import sys; print(sys.modules['typing'].__file__)" | findstr "site-packages" >nul 2>&1
-    if %errorlevel% equ 0 (
-        echo [*] 检测到第三方typing包，正在卸载...
-        python -m pip uninstall -y typing
-        if %errorlevel% equ 0 (
-            echo [✓] typing包已卸载（Python 3.5+已内置typing模块）
-        ) else (
-            echo [警告] typing包卸载失败，打包可能会出错
-        )
+REM 删除旧的dist目录
+if exist "dist" (
+    echo [*] 删除旧的dist目录...
+    rmdir /s /q dist
+    if %errorlevel% neq 0 (
+        echo [警告] 删除dist目录失败，可能有文件被占用
+    ) else (
+        echo [✓] 旧dist目录已删除
     )
 )
+
+REM 卸载typing包（与PyInstaller不兼容）
+echo [*] 检查typing包...
+python -c "import typing, sys; f = getattr(typing, '__file__', ''); print('site-packages' if 'site-packages' in f else 'builtin')" > temp_typing_check.txt 2>nul
+findstr "site-packages" temp_typing_check.txt >nul 2>&1
+if %errorlevel% equ 0 (
+    echo [*] 检测到第三方typing包，正在卸载...
+    python -m pip uninstall -y typing >nul 2>&1
+    echo [✓] typing包已卸载（Python 3.5+已内置typing模块）
+) else (
+    echo [✓] typing为内置模块，无需卸载
+)
+del temp_typing_check.txt >nul 2>&1
 
 REM 检查python目录是否存在
 if not exist "python" (
